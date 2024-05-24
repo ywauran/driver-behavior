@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity">
+
+    <LinearLayout
+        android:id="@+id/titleLL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Sign"-->
+<!--            android:textAllCaps="true"-->
+<!--            android:textColor="@color/black"-->
+<!--            android:textSize="36sp"-->
+<!--            android:textStyle="bold" />-->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" In"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/signInCV"
+        style="@style/MaterialCardViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginHorizontal="10dp"
+        app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="50dp"
+        android:orientation="vertical">
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/edEmailL"
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            app:startIconDrawable="@drawable/ic_email_24">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edEmail"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/edPasswordL"
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="Kata Sandi"
+            app:endIconMode="password_toggle"
+            app:startIconDrawable="@drawable/ic_lock_24">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edPassword"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <TextView
+            android:id="@+id/forgotPasswordTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="4dp"
+            android:text="Lupa kata sandi?"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="end"
+            android:textColor="#787878"/>
+
+        <Button
+            android:id="@+id/signInBtn"
+            style="@style/FillButton"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#069AAE"
+            android:text="Masuk" />
+    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/signInCV"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Belum punya akun?"
+            android:textAlignment="center"
+            android:textColor="#787878"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <Button
+            android:id="@+id/signUpABtn"
+            style="@style/OutlineButton"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_marginVertical="10dp"
+            android:backgroundTint="@color/white"
+            app:strokeColor="#069AAE"
+            android:textColor="#069AAE"
+            android:text="Daftar" />
+
+
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_above="@id/signInCV"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="-40dp"
+        android:elevation="10dp"
+        android:src="@drawable/logo_app" />
+</RelativeLayout>
