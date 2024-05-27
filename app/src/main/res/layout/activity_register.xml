@@ -131,7 +131,7 @@
             android:backgroundTint="@color/white"
             app:strokeColor="#069AAE"
             android:textColor="#069AAE"
-            android:text="Sign In" />
+            android:text="Masuk" />
     </LinearLayout>
 
     <ImageView
