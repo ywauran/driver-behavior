@@ -1,4 +1,2 @@
-drinking
-eating
-mobile use
-smoking
+distracted
+focused
