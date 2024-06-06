@@ -76,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
                             edEmail.text.toString().trim(),
                             edPassword.text.toString().trim())
                         .addOnSuccessListener {
-                            longToastShow("Login Successful")
+                            longToastShow("Berhasil masuk!")
                             loadingDialog.dismiss()
                             val mainIntent = Intent(this,MainActivity::class.java)
                             mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -89,7 +89,7 @@ class LoginActivity : AppCompatActivity() {
                             it.message?.let { it1 -> longToastShow(it1) }
                         }
                 }else{
-                    longToastShow("No Internet Connection!")
+                    longToastShow("Tidak ada internet!")
                 }
             }
 

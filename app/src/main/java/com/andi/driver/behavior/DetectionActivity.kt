@@ -73,7 +73,7 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
     }
 
     private fun initializeMediaPlayer() {
-        mediaPlayer = MediaPlayer.create(this, R.raw.audio) // Ensure you have alarm_sound.mp3 in res/raw
+        mediaPlayer = MediaPlayer.create(this, R.raw.audio_) // Ensure you have audio.mp3 in res/raw
         mediaPlayer?.setOnPreparedListener {
             it.isLooping = true
         }
@@ -228,15 +228,23 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
                 invalidate()
             }
 
-            val monitoredLabels = listOf("drinking", "eating", "mobile use", "smoking")
+            val monitoredLabels = listOf("distracted")
+            var className: String
             val detectedLabels = boundingBoxes.map { it.clsName }
             if (detectedLabels.any { it in monitoredLabels }) {
-                Toast.makeText(this, "Detected behavior: ${detectedLabels.joinToString(", ")}", Toast.LENGTH_LONG).show()
-                handler.post(vibrationRunnable) // Start continuous vibration
-                playAlarmSound() // Start alarm sound
+                handler.post(vibrationRunnable) // Mulai getaran terus menerus
+
+                if (detectedLabels.contains("focused")) {
+                    className = "Fokus"
+                } else {
+                    className = "Tidak Fokus"
+                }
+
+                playAlarmSound() // Mulai bunyi alarm
+                Toast.makeText(this@DetectionActivity, "Perilaku terdeteksi: $className", Toast.LENGTH_LONG).show()
             } else {
-                handler.removeCallbacks(vibrationRunnable) // Stop vibration if no monitored behavior is detected
-                stopAlarmSound() // Stop alarm sound if no monitored behavior is detected
+                handler.removeCallbacks(vibrationRunnable) // Hentikan getaran jika tidak ada perilaku yang terpantau
+                stopAlarmSound() // Hentikan bunyi alarm jika tidak ada perilaku yang terpantau
             }
         }
     }
