@@ -56,12 +56,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             val bottom = it.y2 * height
 
             canvas.drawRect(left, top, right, bottom, boxPaint)
-            var drawableText: String
-            if (it.clsName == "focused") {
-                drawableText = "Fokus"
-            } else {
-                drawableText = "Tidak Fokus"
-            }
+            val drawableText: String
+            if (it.clsName == "focused") drawableText = "Fokus" else drawableText = "Tidak Fokus"
 
 
             textBackgroundPaint.getTextBounds(drawableText, 0, drawableText.length, bounds)

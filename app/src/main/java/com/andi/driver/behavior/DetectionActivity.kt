@@ -21,25 +21,41 @@ import com.andi.driver.behavior.utils.BoundingBox
 import com.andi.driver.behavior.utils.Constants.LABELS_PATH
 import com.andi.driver.behavior.utils.Constants.MODEL_PATH
 import com.andi.driver.behavior.utils.Detector
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
+import java.util.Date
+import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
 
     private lateinit var binding: ActivityDetectionBinding
-    private var isFrontCamera = true  // Default to front camera
+    private var isFrontCamera = true
     private lateinit var detector: Detector
     private lateinit var cameraExecutor: ExecutorService
     private var cameraProvider: ProcessCameraProvider? = null
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
+    private lateinit var database: FirebaseDatabase
+    private lateinit var currentUser: FirebaseUser
+    private var lastDetectionData: DetectionData? = null
+
+    private val detectionHandler = Handler()
+    private val detectionRunnable = object : Runnable {
+        override fun run() {
+            lastDetectionData?.let { sendDataToFirebase(it) }
+            detectionHandler.postDelayed(this, 20000)
+        }
+    }
 
     private val handler = Handler(Looper.getMainLooper())
     private val vibrationRunnable = object : Runnable {
         override fun run() {
             vibrateDevice()
-            handler.postDelayed(this, 1000) // Repeat every second
+            handler.postDelayed(this, 1000)
         }
     }
 
@@ -49,7 +65,9 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
         super.onCreate(savedInstanceState)
         binding = ActivityDetectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        database = FirebaseDatabase.getInstance()
 
+        currentUser = FirebaseAuth.getInstance().currentUser!!
         initializeDetector()
 
         if (allPermissionsGranted()) {
@@ -88,7 +106,8 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
     }
 
     private fun bindCameraUseCases() {
-        val cameraProvider = cameraProvider ?: throw IllegalStateException("Camera initialization failed.")
+        val cameraProvider =
+            cameraProvider ?: throw IllegalStateException("Camera initialization failed.")
         val rotation = binding.viewFinder.display.rotation
 
         val cameraSelector = CameraSelector.Builder()
@@ -164,7 +183,8 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
     }
 
     private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
         if (permissions[Manifest.permission.CAMERA] == true) {
             startCamera()
         }
@@ -174,7 +194,7 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
         super.onDestroy()
         detector.clear()
         cameraExecutor.shutdown()
-        handler.removeCallbacks(vibrationRunnable) // Stop vibration when activity is destroyed
+        handler.removeCallbacks(vibrationRunnable)
         mediaPlayer?.release()
         mediaPlayer = null
     }
@@ -216,8 +236,8 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
 
     override fun onEmptyDetect() {
         binding.overlay.invalidate()
-        handler.removeCallbacks(vibrationRunnable) // Stop vibration when no behavior is detected
-        stopAlarmSound() // Stop alarm sound when no behavior is detected
+        handler.removeCallbacks(vibrationRunnable)
+        stopAlarmSound()
     }
 
     override fun onDetect(boundingBoxes: List<BoundingBox>, inferenceTime: Long) {
@@ -232,21 +252,67 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
             var className: String
             val detectedLabels = boundingBoxes.map { it.clsName }
             if (detectedLabels.any { it in monitoredLabels }) {
-                handler.post(vibrationRunnable) // Mulai getaran terus menerus
+                handler.post(vibrationRunnable)
 
-                if (detectedLabels.contains("focused")) {
-                    className = "Fokus"
+                className = if (detectedLabels.contains("focused")) {
+                    "Fokus"
                 } else {
-                    className = "Tidak Fokus"
+                    "Tidak Fokus"
                 }
 
-                playAlarmSound() // Mulai bunyi alarm
-                Toast.makeText(this@DetectionActivity, "Perilaku terdeteksi: $className", Toast.LENGTH_LONG).show()
+                playAlarmSound()
+
+                Toast.makeText(
+                    this@DetectionActivity,
+                    "Perilaku terdeteksi: $className",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                // Generate a new key from Firebase
+                val databaseRef = FirebaseDatabase.getInstance().reference
+                val key = databaseRef.child("detections").push().key
+
+                if (key != null) {
+                    val detectionData = DetectionData(
+                        id = key,
+                        userId = currentUser.uid,
+                        cls = className,
+                        createdAt = Date().toString(),
+                        updatedAt = Date().toString()
+                    )
+
+                    lastDetectionData = detectionData
+
+                    createHistory(currentUser.uid, detectionData)
+                } else {
+                    Log.e("DetectionActivity", "Failed to generate Firebase key")
+                }
             } else {
-                handler.removeCallbacks(vibrationRunnable) // Hentikan getaran jika tidak ada perilaku yang terpantau
-                stopAlarmSound() // Hentikan bunyi alarm jika tidak ada perilaku yang terpantau
+                handler.removeCallbacks(vibrationRunnable)
+                stopAlarmSound()
             }
         }
+    }
+
+    private fun createHistory(userId: String, dataDetection: DetectionData) {
+        // Get a reference to the "history" node for the specified user
+        val historyRef = database.reference.child("history").child(userId)
+
+        // Generate a new child location with a unique key and set the value to dataDetection
+        historyRef.push().setValue(dataDetection)
+            .addOnSuccessListener {
+                // Handle success, if necessary
+                println("Data added successfully")
+            }
+            .addOnFailureListener { exception ->
+                // Handle failure, if necessary
+                println("Failed to add data: ${exception.message}")
+            }
+    }
+
+
+    private fun sendDataToFirebase(lastDetectionData: DetectionData) {
+        createHistory(currentUser.uid, lastDetectionData)
     }
 
     companion object {
@@ -255,3 +321,4 @@ class DetectionActivity : AppCompatActivity(), Detector.DetectorListener {
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
 }
+
